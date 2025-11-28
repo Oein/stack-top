@@ -296,6 +296,8 @@ two.bind("update", () => {
 });
 
 // Input Handling
+let spacePressed = false;
+
 function handleInput() {
   if (gameState.gameOver) {
     initGame();
@@ -304,11 +306,31 @@ function handleInput() {
   }
 }
 
+function handleSpaceRestart() {
+  if (gameState.gameOver) {
+    initGame();
+  }
+}
+
 window.addEventListener("click", handleInput);
 window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && e.repeat === false) {
+    e.preventDefault();
+    if (!spacePressed && !gameState.gameOver) {
+      spacePressed = true;
+      handleInput();
+    }
+  }
+});
+
+window.addEventListener("keyup", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
-    handleInput();
+    if (spacePressed && !gameState.gameOver) {
+      spacePressed = false;
+    } else if (gameState.gameOver) {
+      handleSpaceRestart();
+    }
   }
 });
 
