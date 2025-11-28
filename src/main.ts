@@ -56,6 +56,7 @@ const gameState = {
   blocks: [] as Block[],
   currentBlock: null as Block | null,
   gameOver: false,
+  cameraY: 0, // Camera offset for scrolling
 };
 
 // Two.js Setup
@@ -98,7 +99,7 @@ function createBlock(
   speed: number,
   direction: 1 | -1
 ): Block {
-  const rect = two.makeRectangle(x, y, width, BLOCK_HEIGHT);
+  const rect = two.makeRectangle(x, y - gameState.cameraY, width, BLOCK_HEIGHT);
   rect.fill = getColor(gameState.blocks.length);
   rect.noStroke();
 
@@ -125,6 +126,7 @@ function initGame() {
   gameState.score = 0;
   gameState.gameOver = false;
   gameState.isPlaying = true;
+  gameState.cameraY = 0;
 
   startAt = Date.now();
 
@@ -178,8 +180,8 @@ function updateBlock(block: Block, deltaTime: number) {
     block.direction = -1;
   }
 
-  // Update rectangle position
-  block.rect.translation.set(block.x, block.y);
+  // Update rectangle position with camera offset
+  block.rect.translation.set(block.x, block.y - gameState.cameraY);
 }
 
 function stackBlock() {
@@ -257,6 +259,27 @@ two.bind("update", () => {
   // Update current moving block
   if (gameState.currentBlock) {
     updateBlock(gameState.currentBlock, deltaTime);
+  }
+
+  // Update camera to keep top block centered
+  const topBlock =
+    gameState.currentBlock || gameState.blocks[gameState.blocks.length - 1];
+  if (topBlock) {
+    const targetCameraY = topBlock.y - two.height / 2;
+    if (targetCameraY > 0) {
+      gameState.cameraY = targetCameraY;
+
+      // Update all block positions
+      gameState.blocks.forEach((block) => {
+        block.rect.translation.set(block.x, block.y - gameState.cameraY);
+      });
+      if (gameState.currentBlock) {
+        gameState.currentBlock.rect.translation.set(
+          gameState.currentBlock.x,
+          gameState.currentBlock.y - gameState.cameraY
+        );
+      }
+    }
   }
 });
 
