@@ -130,10 +130,10 @@ function initGame() {
 
   startAt = Date.now();
 
-  // Create base block
+  // Create base block at bottom + 100px
   const baseBlock = createBlock(
     GAME_WIDTH / 2,
-    two.height - BLOCK_HEIGHT / 2,
+    two.height - 100 - BLOCK_HEIGHT / 2,
     INITIAL_BLOCK_WIDTH,
     0,
     1
@@ -266,8 +266,9 @@ two.bind("update", () => {
     gameState.currentBlock || gameState.blocks[gameState.blocks.length - 1];
   if (topBlock) {
     const targetCameraY = topBlock.y - two.height / 2;
-    // Always update camera, but ensure it doesn't go below 0
-    gameState.cameraY = targetCameraY;
+    // Smooth camera movement with lerp (interpolation)
+    const lerpFactor = 1 - Math.pow(0.001, deltaTime); // Smooth interpolation
+    gameState.cameraY += (targetCameraY - gameState.cameraY) * lerpFactor;
 
     // Update all block positions and remove offscreen blocks
     gameState.blocks = gameState.blocks.filter((block) => {
