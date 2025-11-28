@@ -131,15 +131,19 @@ function initGame() {
   startAt = Date.now();
 
   // Create base block at bottom + 100px
+  const baseBlockY = two.height - 100 - BLOCK_HEIGHT / 2;
   const baseBlock = createBlock(
     GAME_WIDTH / 2,
-    two.height - 100 - BLOCK_HEIGHT / 2,
+    baseBlockY,
     INITIAL_BLOCK_WIDTH,
     0,
     1
   );
   gameState.blocks.push(baseBlock);
   gameState.score = 1; // Base block counts as first block
+
+  // Set initial camera so base block appears at correct position
+  gameState.cameraY = 0;
 
   // Create first moving block
   spawnNewBlock();
