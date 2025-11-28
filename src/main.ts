@@ -266,19 +266,26 @@ two.bind("update", () => {
     gameState.currentBlock || gameState.blocks[gameState.blocks.length - 1];
   if (topBlock) {
     const targetCameraY = topBlock.y - two.height / 2;
-    if (targetCameraY > 0) {
-      gameState.cameraY = targetCameraY;
+    // Always update camera, but ensure it doesn't go below 0
+    gameState.cameraY = targetCameraY;
 
-      // Update all block positions
-      gameState.blocks.forEach((block) => {
-        block.rect.translation.set(block.x, block.y - gameState.cameraY);
-      });
-      if (gameState.currentBlock) {
-        gameState.currentBlock.rect.translation.set(
-          gameState.currentBlock.x,
-          gameState.currentBlock.y - gameState.cameraY
-        );
+    // Update all block positions and remove offscreen blocks
+    gameState.blocks = gameState.blocks.filter((block) => {
+      const screenY = block.y - gameState.cameraY;
+      if (screenY > two.height + 100) {
+        // Block is below screen, remove it
+        two.remove(block.rect);
+        return false;
       }
+      block.rect.translation.set(block.x, screenY);
+      return true;
+    });
+
+    if (gameState.currentBlock) {
+      gameState.currentBlock.rect.translation.set(
+        gameState.currentBlock.x,
+        gameState.currentBlock.y - gameState.cameraY
+      );
     }
   }
 });
